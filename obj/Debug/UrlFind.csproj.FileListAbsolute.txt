@@ -1,0 +1,11 @@
+D:\С#\test\Developex\UrlFind\bin\Debug\UrlFind.exe.config
+D:\С#\test\Developex\bin\Debug\UrlFind.exe.config
+D:\С#\test\Developex\bin\Debug\UrlFind.exe
+D:\С#\test\Developex\bin\Debug\UrlFind.pdb
+D:\С#\test\Developex\obj\Debug\UrlFind.csprojResolveAssemblyReference.cache
+D:\С#\test\Developex\obj\Debug\UrlFind.MainForm.resources
+D:\С#\test\Developex\obj\Debug\UrlFind.Properties.Resources.resources
+D:\С#\test\Developex\obj\Debug\UrlFind.csproj.GenerateResource.Cache
+D:\С#\test\Developex\obj\Debug\UrlFind.exe
+D:\С#\test\Developex\obj\Debug\UrlFind.pdb
+D:\С#\test\Developex\bin\Debug\HtmlAgilityPack.dll
