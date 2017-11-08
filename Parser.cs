@@ -38,7 +38,7 @@ namespace UrlFind
         public int MaxThreads;
         private int _currentLevel;
         private int _activeThreads;
-        private int _currentUrl;
+        private int _currentUrlNumber;
         //public int _totalUrl;
         
         ConcurrentDictionary<int, List<string>> listUrl;
@@ -53,7 +53,7 @@ namespace UrlFind
             SearchText = searchText;
            
             _currentLevel = 0;
-            _currentUrl = 0;
+            _currentUrlNumber = 0;
           //  _totalUrl = 0;
             listUrl = new ConcurrentDictionary<int, List<string>>();  // level, List<Url>
             unicUrl = new ConcurrentBag<string>();
@@ -79,14 +79,14 @@ namespace UrlFind
             IsActive = true;
           
 
-            listUrl.TryAdd(0, new List<string> { StartUrl});
+            listUrl.TryAdd(1, new List<string> { StartUrl});
          
-            for (int i = 0; i < MaxDepth; i++) {
-                _currentLevel = i;
-
+            for (int i = 1; i <= MaxDepth; i++) {
+           
                 if (!IsActive)
                     break;
 
+                _currentLevel = i;
                 GetLinks();
             }
 
@@ -96,7 +96,7 @@ namespace UrlFind
 
         public void GetLinks() {
 
-            _currentUrl = 0;
+            _currentUrlNumber = 0;
             List<string> urlList; // список URL для текущего уровня
             listUrl.TryGetValue(_currentLevel, out urlList);
 
@@ -107,21 +107,25 @@ namespace UrlFind
                     options,
                     (i, loopState) =>
                     {
-                        _activeThreads++;
-                        _currentUrl++;
+                    
                         if (!IsActive) 
                             return;
 
-                        string html = GetHtml(urlList[i]);
+                        _activeThreads++;
+                        _currentUrlNumber++;
+
+                        string currentUrl = urlList[i];
+                        string html = GetHtml(currentUrl);
 
                         if (html.Contains(SearchText)) {
                             Log("Found text on url:{0}, Level:{1}", urlList[i], _currentLevel);
                             IsActive = false;
+
                             return;
                         }
-                            
-                        var activeLink = GetActiveHref(html);
-                        listUrl.TryAdd(_currentLevel + 1, activeLink);
+
+                        var activeLinks = GetActiveHref(html, currentUrl);
+                        listUrl.AddOrUpdate(_currentLevel + 1, activeLinks, (k, v) => { v.AddRange(activeLinks); return v; });
 
                         _activeThreads--;
                        
@@ -131,7 +135,7 @@ namespace UrlFind
 
         }
 
-        private List<string> GetActiveHref(string html) {
+        private List<string> GetActiveHref(string html, string currentUrl) {
 
             var hrefList = new List<string>();
 
@@ -141,11 +145,15 @@ namespace UrlFind
             HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(html);
             var nodeList = doc.DocumentNode.SelectNodes("//a");
+            
+            if (nodeList!=null)
             foreach (var node in nodeList) {
                 if (node.Attributes["href"] != null) { 
                     
                     string newUrl = node.Attributes["href"].Value;
-                    if (ValidUrl(newUrl) && !unicUrl.Contains(newUrl)){
+
+                    if (ValidUrl(ref newUrl, currentUrl) && !unicUrl.Contains(newUrl))
+                    {
                         unicUrl.Add(newUrl);
                         hrefList.Add(newUrl);
                     }
@@ -157,11 +165,19 @@ namespace UrlFind
                 
         }
 
-        public bool ValidUrl(string url) {
-            return 
-                !string.IsNullOrEmpty(url) 
-                && Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute)
-                && url.StartsWith("http");
+        public bool ValidUrl(ref string url, string baseUrl)
+        {
+
+            bool res = !string.IsNullOrEmpty(url)
+                && Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute);
+
+            if (res && !url.StartsWith("http")) {
+                var baseUri = new Uri(baseUrl);
+                var fullUri = new Uri(baseUri, url);
+                url = fullUri.ToString();
+            }
+        
+            return res;
         }
 
         private string GetHtml(string adress)
@@ -171,6 +187,8 @@ namespace UrlFind
             try
             {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(adress);
+                request.Timeout = 3000;
+                request.ReadWriteTimeout = 5000;
                 HttpWebResponse response = (HttpWebResponse)request.GetResponse();
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -189,13 +207,13 @@ namespace UrlFind
                     readStream.Close();
                 }
             }
-            catch (Exception e) {
-                Log("Can't get url:{0}, Error:{1}", adress, e.Message.Substring(0,50));
+            catch (Exception e)
+            {
+                Log("Can't get url:{0}, Error:{1}", adress, e.Message.Length > 50 ? e.Message.Substring(0, 50) : e.Message);
             }
 
             return _content;
         }
-
 
         public void StopParse() {
             IsActive = false;
@@ -210,7 +228,7 @@ namespace UrlFind
             info.ActiveThreads = _activeThreads;
             info.Level = _currentLevel;
             info.TotalUrl = listUrl[_currentLevel].Count;
-            info.CurrentUrl = _currentUrl;
+            info.CurrentUrl = _currentUrlNumber;
             return info;
         }
 

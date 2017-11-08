@@ -104,7 +104,7 @@
             this.tbUrl.Name = "tbUrl";
             this.tbUrl.Size = new System.Drawing.Size(330, 20);
             this.tbUrl.TabIndex = 4;
-            this.tbUrl.Text = "http://olx.ua";
+            this.tbUrl.Text = "https://health.synevo.ua";
             // 
             // lblUrl
             // 
@@ -138,9 +138,9 @@
             this.lblMaxDepth.AutoSize = true;
             this.lblMaxDepth.Location = new System.Drawing.Point(469, 55);
             this.lblMaxDepth.Name = "lblMaxDepth";
-            this.lblMaxDepth.Size = new System.Drawing.Size(59, 13);
+            this.lblMaxDepth.Size = new System.Drawing.Size(56, 13);
             this.lblMaxDepth.TabIndex = 8;
-            this.lblMaxDepth.Text = "Max Depth";
+            this.lblMaxDepth.Text = "Max Level";
             // 
             // tbSearchText
             // 
@@ -148,7 +148,7 @@
             this.tbSearchText.Name = "tbSearchText";
             this.tbSearchText.Size = new System.Drawing.Size(199, 20);
             this.tbSearchText.TabIndex = 9;
-            this.tbSearchText.Text = "any text";
+            this.tbSearchText.Text = "Сергей, 32 года";
             // 
             // numMaxThreads
             // 
@@ -162,7 +162,7 @@
             this.numMaxThreads.Size = new System.Drawing.Size(52, 20);
             this.numMaxThreads.TabIndex = 10;
             this.numMaxThreads.Value = new decimal(new int[] {
-            4,
+            10,
             0,
             0,
             0});

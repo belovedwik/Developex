@@ -77,6 +77,7 @@ namespace UrlFind
             }
             else {
                 parser.PauseParse();
+                MessageBox.Show("will be soon ...");
             }
            
 
@@ -96,11 +97,7 @@ namespace UrlFind
             _timer.Stop();
         }
 
-        private void btnPause_Click(object sender, EventArgs e)
-        {
-            Log("Pause...");
-            parser.PauseParse();
-        }
+
 
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
